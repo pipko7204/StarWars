@@ -6,24 +6,38 @@
     <div class="page_container">
       <span>page</span>
       <div
-           v-for="pageNumber in pageNumbers">
+           v-for="pageNumber in pageCount">
         <div>
-          {{pageNumber.page}}
+          {{pageNumber}}
           <input type="radio"
                  name="page"
-                 :checked="pageNumber.checked"
-                 :id="pageNumber.page"
-                 v-on:click="logID(pageNumber.page)"
+                 :id="pageNumber"
+                 :value="pageNumber"
+                 v-model="currentPage"
           >
-          <div></div>
+
         </div>
 
       </div>
+      {{currentPage}}
     </div>
+      <div
+        class="gender"
+      v-for="charGender in Object.values(CHARACTER_GENDER)"
 
+      >
+        {{charGender}}
+        <input type="radio"
+               name="gender"
+               :id="charGender"
+               :value="charGender"
+               v-model="gender"
+        >
+
+      </div>
     <div class="cards_container">
       <div class="card"
-            v-for="{name, id, page} in characters"
+            v-for="{name, id, page} in displayCharecters"
       >
         <img
           :src="getImg( id )" />
@@ -38,24 +52,16 @@
 
 <script>
 import {mapActions, mapGetters} from 'vuex'
+import {CHARACTER_GENDER, PAGE_LIMIT} from "~/utils/consts";
+
 export default {
   components: {},
 
   data() {
     return {
-      request: null,
-      pageNumbers: [
-        {page: 1,
-          checked: 'checked',
-      }, {page: 2,
-      }, {page: 3,
-      }, {page: 4,
-      }, {page: 5,
-      }, {page: 6,
-      }, {page: 7,
-      }, {page: 8,
-      }, {page: 9,
-      }]
+      currentPage: 1,
+      gender: CHARACTER_GENDER.ALL,
+      CHARACTER_GENDER
 
     }
   },
@@ -70,15 +76,36 @@ export default {
       const i = id < 17 ? id : id + 1;
       return `https://starwars-visualguide.com/assets/img/characters/${i}.jpg`;
     },
-    logID(id) {
-      console.log(id)
-    },
-
   },
   computed: {
     ...mapGetters ({
       characters: "characters/getCharacters",
-    })
+      /* pageCount: "characters/getPageCount" */
+    }),
+    pageCount() {
+      return Math.ceil(this.filteredCharacters.length/PAGE_LIMIT)
+    },
+    displayCharecters() {
+      const offset = (this.currentPage - 1) * PAGE_LIMIT
+      return this.filteredCharacters.slice(offset, offset + PAGE_LIMIT)
+    },
+    filteredCharacters() {
+
+      if (this.gender === CHARACTER_GENDER.ALL) {
+        return this.characters
+      }
+      return this.characters.filter((char) => {
+        return char.gender === this.gender
+      })
+
+    }
+  },
+  watch: {
+    gender: {
+      handler() {
+        this.currentPage = 1
+      }
+    }
   }
 
 }
@@ -86,6 +113,9 @@ export default {
 </script>
 
 <style scoped lang="scss" >
+.gender {
+  z-index: 2;
+}
 
 .page_container {
   z-index: 1;

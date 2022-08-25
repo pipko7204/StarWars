@@ -1,13 +1,17 @@
 export default {
-  async fetchCharacters({commit}) {
-    for(let i = 1; i <= 9; i++) {
-      const requestCharacters = await this.$axios.$get(`https://swapi.dev/api/people/?page=${i}`)
-      const responcedCharacters = await requestCharacters.results
+  async fetchCharacters({commit, getters}) {
+    let count = 0;
+    let i = 1;
+    do{const requestCharacters = await this.$axios.$get(`https://swapi.dev/api/people/?page=${i}`)
+      const responcedCharacters = requestCharacters.results
+      count = requestCharacters.count
       for (let j = 1; j <= responcedCharacters.length; j++) {
         responcedCharacters[j - 1].id = j !== 10 ? Number(`${i-1}` + `${j}`) : Number(`${i}` + '0')
-        responcedCharacters[j - 1].page = i
+/*         responcedCharacters[j - 1].page = i */
       }
-      commit('updateCharacters', responcedCharacters)
-    }
+      commit('updateCharacters', {responcedCharacters, count: requestCharacters.count})
+      i += 1
+    } while (getters.getCharacters.length < count)
+
   },
 }
