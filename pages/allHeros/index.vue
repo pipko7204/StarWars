@@ -4,44 +4,58 @@
       <h1>Chose your favorite characters</h1>
     </header>
     <div class="page_container">
-      <span>page</span>
       <div
-           v-for="pageNumber in pageCount">
-        <div>
+           v-for="pageNumber in pageCount"
+
+      >
+        <label>
+          <div class="pageNumber_container"
+               v-bind:class="{active: pageNumber === currentPage}"
+
+          >
           {{pageNumber}}
           <input type="radio"
                  name="page"
+                 class="button"
                  :id="pageNumber"
                  :value="pageNumber"
                  v-model="currentPage"
+
           >
-
-        </div>
-
+          </div>
+        </label>
       </div>
-      {{currentPage}}
+
     </div>
-      <div
-        class="gender"
+    <div class="genders_container">
+    <div
+      class="gender"
       v-for="charGender in Object.values(CHARACTER_GENDER)"
+    >
+    <label>
+      <div class="gender_container"
+        v-bind:class="{active: charGender === Object.values(CHARACTER_GENDER)}"
 
       >
         {{charGender}}
         <input type="radio"
+               class="button"
                name="gender"
                :id="charGender"
                :value="charGender"
                v-model="gender"
         >
-
       </div>
+    </label>
+      </div>
+    </div>
     <div class="cards_container">
       <div class="card"
-            v-for="{name, id, page} in displayCharecters"
+            v-for="{name, id, gender} in displayCharecters"
       >
         <img
           :src="getImg( id )" />
-        {{name}} {{id}} page: {{page}}
+        {{name}} {{id}} {{gender}}
       </div>
     </div>
 
@@ -59,6 +73,7 @@ export default {
 
   data() {
     return {
+      isActive: true,
       currentPage: 1,
       gender: CHARACTER_GENDER.ALL,
       CHARACTER_GENDER
@@ -76,11 +91,12 @@ export default {
       const i = id < 17 ? id : id + 1;
       return `https://starwars-visualguide.com/assets/img/characters/${i}.jpg`;
     },
+
   },
   computed: {
     ...mapGetters ({
       characters: "characters/getCharacters",
-      /* pageCount: "characters/getPageCount" */
+
     }),
     pageCount() {
       return Math.ceil(this.filteredCharacters.length/PAGE_LIMIT)
@@ -98,31 +114,69 @@ export default {
         return char.gender === this.gender
       })
 
-    }
+    },
+
   },
   watch: {
     gender: {
       handler() {
         this.currentPage = 1
       }
-    }
-  }
+    },
 
+  }
 }
 
 </script>
 
 <style scoped lang="scss" >
-.gender {
-  z-index: 2;
+
+.active {
+  background: bisque;
+  color: black;
 }
 
-.page_container {
+.pageNumber_container, .gender_container {
+  z-index: 3;
+  border: 2px solid gold;
+  border-radius: 5px;
+  margin: 5px;
+  width: 25px;
+  height: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-right: 0px;
+  padding-left:10px;
+  &:hover {
+    background: gold;
+    cursor: pointer;
+    color: black;
+  }
+}
+.gender_container {
+  width: auto;
+  height: 25px;
+}
+
+.page_container, .genders_container {
   z-index: 1;
   display: flex;
   flex-direction: row;
   align-items: flex-end;
+  flex-wrap: wrap;
 }
+
+.button {
+  width: 0px;
+  height: 0px;
+}
+
+.gender {
+  z-index: 2;
+}
+
+
 
 .cards_container {
   z-index: 1;
@@ -162,7 +216,7 @@ header {
   flex-direction: column;
   width: 100%;
   height: 100%;
-  color: bisque;
+  color: gold;
 }
 
 
