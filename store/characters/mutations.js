@@ -7,4 +7,10 @@ export default {
 
     console.log(state)
   },
+  setCharacterLike(state, id) {
+    const card = state.characters.find((char) => char.id === id);
+    if (card) {
+      card.isLiked = !card.isLiked
+    }
+  }
 }
