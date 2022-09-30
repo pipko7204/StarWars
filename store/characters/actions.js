@@ -1,3 +1,5 @@
+import state from "~/store/characters/state";
+
 export default {
   async fetchCharacters({commit, getters}) {
     let count = 0;

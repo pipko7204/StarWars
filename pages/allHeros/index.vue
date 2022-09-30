@@ -3,7 +3,9 @@
     <header>
       <h1>Chose your favorite characters</h1>
     </header>
-
+    <a href="http://localhost:3000/favoriteHeros"
+    style="z-index: 3; color: gold; cursor: pointer;"
+    >FAVORITE</a>
     <div class="header-panel">
         <input type="text"
                class="input-text"
@@ -33,41 +35,18 @@
         </div>
       </div>
     </div>
-    <div class="page_container">
-      <div
-        v-for="pageNumber in pageCount"
 
-      >
-        <label>
-          <div class="pageNumber_container"
-               v-bind:class="{active: pageNumber === currentPage}"
-
-          >
-            {{pageNumber}}
-            <input type="radio"
-                   name="page"
-                   class="button"
-                   :id="pageNumber"
-                   :value="pageNumber"
-                   v-model="currentPage"
-
-            >
-          </div>
-        </label>
-      </div>
-
-    </div>
     <div class="cards_container">
       <div class="cards_container-card"
             v-for="char in displayCharecters"
       >
         <img
           :src="getImg( char.id )" />
-        <div class="cards_container-description">
+        <div class="cards_container-description" >
           <h3>{{char.name}}</h3>
 
           <div class="heart "
-            v-on:click="changeLikeStatus(char.id)"
+            v-on:click="changeLike(char.id)"
             :class="{active: char.isLiked}"
           >
 
@@ -76,15 +55,35 @@
         </div>
       </div>
     </div>
+    <div class="page_container">
+      <div
+        v-for="pageNumber in pageCount"
 
-      <div class="stars"></div>
-      <div class="twinkling"></div>
+      >
+        <label>
+          <div class="pageNumber_container"
+               v-bind:class="{active: pageNumber === currentPage}"
+          >
+            {{pageNumber}}
+            <input type="radio"
+                   name="page"
+                   class="button"
+                   :id="pageNumber"
+                   :value="pageNumber"
+                   v-model="currentPage"
+            >
+          </div>
+        </label>
+      </div>
+    </div>
+      <background/>
   </div>
 </template>
 
 <script>
 import {mapActions, mapGetters} from 'vuex'
 import {CHARACTER_GENDER, PAGE_LIMIT} from "~/utils/consts";
+import state from "~/store/characters/state";
 
 export default {
   components: {},
@@ -109,20 +108,39 @@ export default {
       const i = id < 17 ? id : id + 1;
       return `https://starwars-visualguide.com/assets/img/characters/${i}.jpg`;
     },
+    changeLike(id) {
+      this.changeLikeStatus(id)
 
+      this.$cookies.set(`${this.characters[id-1].id}`, this.characters[id -1].isLiked)
+      const cookiesChar = this.$cookies.get(`${this.characters[id-1].id}`)
+      if (!cookiesChar) {
+        this.$cookies.remove(`${this.characters[id-1].id}`)
+      }
+      const qwe = this.$cookies.getAll()
+      console.log(qwe)
+    },
+    checkLike() {
+      const cookieStore = this.$cookies.getAll()
+      console.log(cookieStore)
+      for (let i = 1; i <= this.characters.length; i++) {
+          if (typeof cookieStore[i] !== "undefined" && this.characters[i -1].isLiked === false) {
+            this.changeLikeStatus(i)
+            console.log("i", i)
+          }
+        }
+    },
+  },
+  beforeUpdate() {
+    this.checkLike()
   },
   computed: {
     ...mapGetters ({
       characters: "characters/getCharacters",
-
     }),
+
+
     pageCount() {
       return Math.ceil(this.filteredCharacters.length/PAGE_LIMIT)
-    },
-    filteredByLike() {
-      return this.characters.filter((char) => {
-        return char.isLiked === true
-      })
     },
     displayCharecters() {
       const offset = (this.currentPage - 1) * PAGE_LIMIT
@@ -137,15 +155,10 @@ export default {
       if (this.gender === CHARACTER_GENDER.ALL) {
         return this.filteredBySearch
       }
-
       return this.filteredBySearch.filter((char) => {
         return char.gender === this.gender
       })
-
     },
-
-
-
   },
   watch: {
     gender: {
@@ -168,6 +181,9 @@ export default {
   box-shadow: -1px 0px 2px #444;
   border-radius: 50px 50px 0 0;
   transform: rotate(315deg);
+  &:hover {
+    cursor: pointer;
+  }
 
   &:before {
     position: absolute;
